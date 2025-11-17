@@ -43,8 +43,20 @@ class BannedWordsManager {
     // Fallback to default list if localStorage unavailable or empty
     import('../data/defaultBannedWords').then(module => {
       this.bannedWords = module.defaultBannedWords;
-    }).catch(() => {
-      this.bannedWords = [];
+      this.saveBannedWords();
+    }).catch((error) => {
+      console.error('Failed to load default banned words:', error);
+      // Set some basic default words if import fails
+      this.bannedWords = [
+        { word: "damn", alternatives: ["darn", "drat", "blast"], category: "profanity" },
+        { word: "hell", alternatives: ["heck", "gosh", "goodness"], category: "profanity" },
+        { word: "crap", alternatives: ["junk", "stuff", "mess"], category: "profanity" },
+        { word: "ass", alternatives: ["donkey", "rear", "backside"], category: "profanity" },
+        { word: "bitch", alternatives: ["person", "individual", "complainer"], category: "profanity" },
+        { word: "fuck", alternatives: ["intensify", "emphasize", "replace"], category: "profanity" },
+        { word: "shit", alternatives: ["stuff", "mess", "excrement"], category: "profanity" }
+      ];
+      this.saveBannedWords();
     });
   }
 
