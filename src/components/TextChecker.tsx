@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import BannedWordsManager, { TextMatch } from '../lib/BannedWordsManager';
+import AdminSettings from './AdminSettings';
 
 export default function TextChecker() {
   const [inputText, setInputText] = useState('');
