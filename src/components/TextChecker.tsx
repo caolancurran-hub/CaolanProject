@@ -86,7 +86,7 @@ export default function TextChecker() {
       return inputText;
     }
 
-    const segments: JSX.Element[] = [];
+    const segments: React.ReactNode[] = [];
     let lastIndex = 0;
 
     matches.forEach((match) => {
