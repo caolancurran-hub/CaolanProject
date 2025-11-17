@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .highlight {
+            background-color: #fecaca;
+            color: #dc2626;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-zinc-50 dark:bg-black min-h-screen p-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8 text-black dark:text-white">
+            Text Checker
+        </h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Input Section -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">
+                    Original Text
+                </h2>
+                <textarea
+                    id="inputText"
+                    placeholder="Enter your text here to check for banned words..."
+                    class="w-full h-64 p-4 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                ></textarea>
+                <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span id="wordCount">No banned words found</span>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">
+                    Cleaned Text
+                </h2>
+                <textarea
+                    id="outputText"
+                    readonly
+                    placeholder="Cleaned text will appear here..."
+                    class="w-full h-64 p-4 border border-gray-300 dark:border-gray-600 rounded-lg resize-none bg-gray-50 dark:bg-gray-800 text-black dark:text-white"
+                ></textarea>
+                <button
+                    id="copyButton"
+                    onclick="copyToClipboard()"
+                    class="mt-4 w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+                >
+                    Copy to Clipboard
+                </button>
+            </div>
+        </div>
+
+        <!-- Highlighted Text Display -->
+        <div class="mt-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">
+                Highlighted Text
+            </h2>
+            <div id="highlightedText" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg min-h-[100px] text-black dark:text-white leading-relaxed">
+                Enter text above to see highlighted banned words.
+            </div>
+        </div>
+
+        <!-- Alternatives Section -->
+        <div id="alternativesSection" class="mt-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6" style="display: none;">
+            <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">
+                Alternative Words
+            </h2>
+            <div id="alternativesList" class="space-y-2">
+                <!-- Alternatives will be populated here -->
+            </div>
+        </div>
+
+        <!-- Word List Reference -->
+        <div class="mt-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">
+                Banned Words Reference
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <h3 class="font-semibold text-red-600 dark:text-red-400 mb-2">Profanity</h3>
+                    <ul class="space-y-1 text-gray-600 dark:text-gray-400">
+                        <li>• damn → darn, drat</li>
+                        <li>• hell → heck, gosh</li>
+                        <li>• crap → stuff, mess</li>
+                        <li>• ass → donkey, rear</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-red-600 dark:text-red-400 mb-2">Offensive</h3>
+                    <ul class="space-y-1 text-gray-600 dark:text-gray-400">
+                        <li>• kill → eliminate, stop</li>
+                        <li>• hate → dislike, despise</li>
+                        <li>• stupid → unwise, silly</li>
+                        <li>• ugly → unattractive</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-red-600 dark:text-red-400 mb-2">Inappropriate</h3>
+                    <ul class="space-y-1 text-gray-600 dark:text-gray-400">
+                        <li>• drug → medication</li>
+                        <li>• abuse → mistreatment</li>
+                        <li>• weapon → tool</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-red-600 dark:text-red-400 mb-2">Other</h3>
+                    <ul class="space-y-1 text-gray-600 dark:text-gray-400">
+                        <li>• loser → unsuccessful</li>
+                        <li>• failure → error, mistake</li>
+                        <li>• curse → swear, hex</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                Note: This static version shows common banned words. The full application includes 200+ words with full admin management.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simplified banned words list for demo
+        const bannedWords = [
+            { word: "damn", alternatives: ["darn", "drat", "blast"] },
+            { word: "hell", alternatives: ["heck", "gosh", "goodness"] },
+            { word: "crap", alternatives: ["junk", "stuff", "mess"] },
+            { word: "ass", alternatives: ["donkey", "rear", "backside"] },
+            { word: "bitch", alternatives: ["person", "individual", "complainer"] },
+            { word: "shit", alternatives: ["stuff", "mess", "excrement"] },
+            { word: "fuck", alternatives: ["intensify", "emphasize", "replace"] },
+            { word: "screw", alternatives: ["fasten", "secure", "attach"] },
+            { word: "suck", alternatives: ["terrible", "awful", "poor"] },
+            { word: "piss", alternatives: ["urinate", "angry", "upset"] },
+            { word: "kill", alternatives: ["eliminate", "remove", "stop"] },
+            { word: "hate", alternatives: ["dislike", "despise", "strongly dislike"] },
+            { word: "stupid", alternatives: ["unwise", "silly", "foolish"] },
+            { word: "idiot", alternatives: ["fool", "silly", "person"] },
+            { word: "dumb", alternatives: ["silent", "unable to speak", "unwise"] },
+            { word: "ugly", alternatives: ["unattractive", "plain", "unpleasant"] },
+            { word: "fat", alternatives: ["overweight", "large", "heavy"] },
+            { word: "loser", alternatives: ["unsuccessful", "person", "individual"] },
+            { word: "failure", alternatives: ["unsuccessful", "mistake", "error"] },
+            { word: "curse", alternatives: ["swear", "condemn", "hex"] }
+        ];
+
+        let selectedAlternatives = new Map();
+
+        function processText(text) {
+            if (!text) {
+                return { matches: [], processedText: text };
+            }
+
+            const matches = [];
+            const lowerText = text.toLowerCase();
+
+            bannedWords.forEach(bannedWord => {
+                const bannedLower = bannedWord.word.toLowerCase();
+                let startIndex = 0;
+
+                while (true) {
+                    const index = lowerText.indexOf(bannedLower, startIndex);
+                    if (index === -1) break;
+
+                    const matchKey = `${bannedWord.word}-${index}`;
+                    matches.push({
+                        word: bannedWord.word,
+                        position: index,
+                        length: bannedWord.word.length,
+                        alternatives: bannedWord.alternatives,
+                        selectedAlternative: selectedAlternatives.get(matchKey) || bannedWord.alternatives[0],
+                        matchKey: matchKey
+                    });
+
+                    startIndex = index + 1;
+                }
+            });
+
+            // Sort by position, then by length (longer first)
+            matches.sort((a, b) => {
+                if (a.position !== b.position) return a.position - b.position;
+                return b.length - a.length;
+            });
+
+            // Remove overlaps
+            const nonOverlapping = [];
+            for (const match of matches) {
+                const hasOverlap = nonOverlapping.some(existing =>
+                    match.position < existing.position + existing.length &&
+                    match.position + match.length > existing.position
+                );
+                if (!hasOverlap) {
+                    nonOverlapping.push(match);
+                }
+            }
+
+            // Process text
+            let processedText = text;
+            nonOverlapping.sort((a, b) => b.position - a.position);
+
+            for (const match of nonOverlapping) {
+                const replacement = selectedAlternatives.get(match.matchKey) || match.selectedAlternative;
+                processedText = processedText.slice(0, match.position) + replacement + processedText.slice(match.position + match.length);
+            }
+
+            return { matches: nonOverlapping, processedText };
+        }
+
+        function highlightText(text, matches) {
+            if (!text || matches.length === 0) return text;
+
+            let result = '';
+            let lastIndex = 0;
+
+            matches.forEach(match => {
+                if (match.position > lastIndex) {
+                    result += text.slice(lastIndex, match.position);
+                }
+                result += `<span class="highlight" title="${match.word}">${text.slice(match.position, match.position + match.length)}</span>`;
+                lastIndex = match.position + match.length;
+            });
+
+            if (lastIndex < text.length) {
+                result += text.slice(lastIndex);
+            }
+
+            return result;
+        }
+
+        function updateUI() {
+            const inputText = document.getElementById('inputText').value;
+            const { matches, processedText } = processText(inputText);
+
+            // Update output text
+            document.getElementById('outputText').value = processedText;
+
+            // Update highlighted text
+            const highlightedDiv = document.getElementById('highlightedText');
+            highlightedDiv.innerHTML = highlightText(inputText, matches) || 'Enter text above to see highlighted banned words.';
+
+            // Update word count
+            const wordCount = document.getElementById('wordCount');
+            if (matches.length > 0) {
+                wordCount.textContent = `Found ${matches.length} banned word${matches.length !== 1 ? 's' : ''}`;
+                wordCount.className = 'text-sm text-red-600 dark:text-red-400';
+            } else {
+                wordCount.textContent = 'No banned words found';
+                wordCount.className = 'text-sm text-gray-600 dark:text-gray-400';
+            }
+
+            // Update alternatives section
+            const alternativesSection = document.getElementById('alternativesSection');
+            const alternativesList = document.getElementById('alternativesList');
+
+            if (matches.length > 0) {
+                alternativesSection.style.display = 'block';
+                alternativesList.innerHTML = matches.map(match => `
+                    <div class="flex items-center space-x-2 text-sm">
+                        <span class="font-medium text-red-600 dark:text-red-400 min-w-20">${match.word}:</span>
+                        <select onchange="updateAlternative('${match.matchKey}', this.value)" class="flex-1 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-black dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            ${match.alternatives.map(alt => `
+                                <option value="${alt}" ${alt === match.selectedAlternative ? 'selected' : ''}>${alt}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                `).join('');
+            } else {
+                alternativesSection.style.display = 'none';
+            }
+        }
+
+        function updateAlternative(matchKey, alternative) {
+            selectedAlternatives.set(matchKey, alternative);
+            updateUI();
+        }
+
+        function copyToClipboard() {
+            const outputText = document.getElementById('outputText').value;
+            if (!outputText) {
+                alert('No text to copy!');
+                return;
+            }
+
+            navigator.clipboard.writeText(outputText).then(() => {
+                const button = document.getElementById('copyButton');
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.remove('bg-green-500', 'hover:bg-green-600');
+                button.classList.add('bg-green-600');
+
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('bg-green-600');
+                    button.classList.add('bg-green-500', 'hover:bg-green-600');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert('Failed to copy text. Please copy manually.');
+            });
+        }
+
+        // Set up event listener
+        document.getElementById('inputText').addEventListener('input', updateUI);
+
+        // Initialize UI
+        updateUI();
+    </script>
+</body>
+</html>
