@@ -286,35 +286,10 @@ export default function TextChecker() {
 
         {/* Admin Settings Component */}
         {showAdmin && adminPassword && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-black dark:text-white">
-                  Admin Settings
-                </h3>
-                <button
-                  onClick={handleAdminClose}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Admin interface would go here. For now, this shows basic functionality.
-              </div>
-              <div className="space-y-4">
-                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <h4 className="font-semibold text-black dark:text-white mb-2">Statistics</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Total banned words: {bannedWordsManager.getAllBannedWords().length}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Words in current text: {matches.length}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AdminSettings
+            onClose={handleAdminClose}
+            bannedWordsManager={bannedWordsManager}
+          />
         )}
       </div>
     </div>
