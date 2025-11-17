@@ -75,7 +75,7 @@ class BannedWordsManager {
         matches.push({
           word: bannedWord.word,
           position: index,
-          length: bannedWord.length,
+          length: bannedWord.word.length,
           alternatives: bannedWord.alternatives,
           selectedAlternative
         });
